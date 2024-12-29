@@ -10,6 +10,7 @@ https://mghs15.github.io/maplibre-geojson-tile/
 * https://github.com/mapbox/vt-pbf/ 
   * 基本的に、このソースコードを流用しています。
 * https://github.com/mapbox/pbf
+* https://github.com/mapbox/geojson-vt
 * 地理院地図/地理院タイル
 * https://qiita.com/frogcat/items/b38b5e37535b65c5464b
 
