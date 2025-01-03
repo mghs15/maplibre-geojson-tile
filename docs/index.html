@@ -71,15 +71,16 @@ body { margin:0; padding:0;}
     <select id="tileId" onchange="setOverlayStyles();">
       <option value="experimental_landformclassification1">自然地形（ZL5-16）</option>
       <option value="experimental_landformclassification2">人工地形（ZL14-16）</option>
-      <option value="disaster_lore_all">自然災害伝承碑（ZL7）</option>
       <option value="experimental_rvrcl">河川中心線（ZL16）</option>
       <!-- -->
+      <option value="disaster_lore_all">自然災害伝承碑（ZL7）</option>
       <option value="20240102noto_suzu_0102suichoku">能登半島地震  垂直写真 珠洲地区（1/2撮影）（ZL2）</option>
       <option value="20240106noto_suzu_wazimahigashi_hokai_all">能登半島地震 斜面崩壊・堆積分布 珠洲地区・輪島地区（ZL2）</option>
       <option value="20240106noto_suzu_wazimahigashi_0109rev">能登半島地震 津波浸水域 珠洲地区・輪島地区（ZL2）</option>
       <!--
       <option value="minato_polygon">みなとオアシス登録施設（ポリゴン）（ZL2）</option>
       -->
+      <option value="disaster_lore_all_nonative">*自然災害伝承碑（ZL7）（オーバーズーム対応なし）</option>
       <option value="20240102noto_suzu_0102suichoku_nonative">*能登半島地震  垂直写真 珠洲地区（1/2撮影）（オーバーズーム対応なし）</option>
       <option value="20240106noto_suzu_wazimahigashi_hokai_all_nonative">*能登半島地震 斜面崩壊・堆積分布 珠洲地区・輪島地区（オーバーズーム対応なし）</option>
       <option value="20240106noto_suzu_wazimahigashi_0109rev_nonative">*能登半島地震 津波浸水域 珠洲地区・輪島地区（オーバーズーム対応なし）</option>
@@ -98,17 +99,20 @@ const layerSamples = {
     minzoom:14, maxzoom:16,
     tileurl: "https://cyberjapandata.gsi.go.jp/xyz/experimental_landformclassification2/{z}/{x}/{y}.geojson" // 14-16
   },
-  "disaster_lore_all": {
-    minzoom:7, maxzoom:7,
-    tileurl: "https://cyberjapandata.gsi.go.jp/xyz/disaster_lore_all/{z}/{x}/{y}.geojson" // 7-7
-  },
   "experimental_rvrcl": {
     minzoom:16, maxzoom:16,
     tileurl: "https://cyberjapandata.gsi.go.jp/xyz/experimental_rvrcl/{z}/{x}/{y}.geojson" // 16-16
   },
+  
   // ZL2 のタイルをオーバーズーミングする場合は、mapbox Vector Tile 形式とすると精度の劣化が著しく目立つ
   // 対策として、maxNativeZoom の実装が必要なので、本実装においては、以下のようにURLに組み込む
-  // geojson-tile://maxNativeZoom=2;https://～～～/{z}/{x}/{y}.geojson を想定
+  // "geojson-tile://maxNativeZoom=2;https://～～～/{z}/{x}/{y}.geojson" を想定
+  // source の maxzoom は最大にする必要がある
+  
+  "disaster_lore_all": {
+    minzoom:7, maxzoom:22,
+    tileurl: "maxNativeZoom=7;" + "https://cyberjapandata.gsi.go.jp/xyz/disaster_lore_all/{z}/{x}/{y}.geojson" // 7-7
+  },
   "20240102noto_suzu_0102suichoku": {
     minzoom:2, maxzoom:22,
     tileurl: "maxNativeZoom=2;" + "https://maps.gsi.go.jp/xyz/20240102noto_suzu_0102suichoku/{z}/{x}/{y}.geojson" // 2-2
@@ -126,6 +130,10 @@ const layerSamples = {
     tileurl: "maxNativeZoom=2;" + "https://cyberjapandata.gsi.go.jp/xyz/minato_polygon/{z}/{x}/{y}.geojson" // 2-2
   },
   
+  "disaster_lore_all_nonative": {
+    minzoom:7, maxzoom:7,
+    tileurl: "https://cyberjapandata.gsi.go.jp/xyz/disaster_lore_all/{z}/{x}/{y}.geojson" // 7-7
+  },
   "20240102noto_suzu_0102suichoku_nonative": {
     minzoom:2, maxzoom:2,
     tileurl: "https://maps.gsi.go.jp/xyz/20240102noto_suzu_0102suichoku/{z}/{x}/{y}.geojson" // 2-2
@@ -211,7 +219,7 @@ const setOverlayStyles = () => {
     paint: {
       "circle-opacity": 0.8,
       "circle-radius": 8,
-      "circle-color": randomColorById,
+      "circle-color": colorById,
       "circle-stroke-width": 1,
       "circle-stroke-color": "#FFFFFF"
     }
@@ -233,7 +241,7 @@ const setOverlayStyles = () => {
       "line-color": [
         "case",
         ["has", "_color"], ["get", "_fillColor"],
-        randomColorById
+        colorById
       ],
     }
   });
@@ -254,7 +262,7 @@ const setOverlayStyles = () => {
         "case",
         ["has", "code"], landformColorCase,
         ["has", "_fillColor"], ["get", "_fillColor"],
-        randomColorById
+        colorById
       ],
       "fill-outline-color": [
         "case",
@@ -265,7 +273,7 @@ const setOverlayStyles = () => {
   });  
 }
 
-const randomColorById = [
+const colorById = [
   "match", ["%", ["id"], 12],
   1, "#FF8800",
   2, "#FFFF00",
